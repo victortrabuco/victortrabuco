@@ -1,0 +1,10 @@
+[
+  {
+      "payload": {
+         "search_phrase": "ukraine",
+         "news_category": ["U.S.", "Audio"],
+         "number_months": 2
+      },
+      "files": {}
+  }
+]
