@@ -1,4 +1,4 @@
-from RPA.Robocorp.Process   import Process
+from robocorp.tasks import task
 from RPA.Robocorp.WorkItems import WorkItems
 from RPA.Browser.Selenium   import Selenium
 from RPA.Excel.Application  import Application
@@ -196,6 +196,6 @@ class main:
             except:
                 continue
 
-if __name__ == "__main__":
-    Process().start_process()
+@task
+def process_run():
     main().execute()
