@@ -81,7 +81,7 @@ class web:
                 see_all_button = self.browser.find_elements("//div[@class='search-filter'][1]//button")
                 self.browser.click_element(see_all_button[0])
             first_filter = "//div[@class='search-filter'][1]//li"
-            topics_lines = self.browser.find_elements()
+            topics_lines = self.browser.find_elements(first_filter)
             for index, topic_line in enumerate(topics_lines, 1):
                 if name.lower() in self.browser.get_text(topic_line).lower():
                     self.browser.scroll_element_into_view(f"{first_filter}[{index}]//input")
