@@ -148,7 +148,7 @@ class web:
                 pub_description = self.browser.get_text(f"{lines_locator}[{count}]//p[@class='promo-description']")
                 try:
                     pub_img_src = self.browser.get_element_attribute(f"{lines_locator}[{count}]//img", "src")
-                    pub_img_path = f"data/news_pics/{datetime.datetime.now().strftime('%d%m%Y%H%M%S%f')}.png"
+                    pub_img_path = f"output/{datetime.datetime.now().strftime('%d%m%Y%H%M%S%f')}.png"
                     urllib.request.urlretrieve(pub_img_src, pub_img_path)
                 except:
                     pub_img_path = ""
