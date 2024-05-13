@@ -12,8 +12,8 @@ import logging
 class excel:
     def __init__(self):
         self.excel_app = Files()
-        datetime_now = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-        file_name = f"output/Result {datetime_now}.xlsx"
+
+    def set_new_workbook(self, file_name):
         self.excel_app.create_workbook(file_name)
         self.excel_app.save_workbook()
 
@@ -31,7 +31,7 @@ class excel:
                                           value=data[column_name])
         self.excel_app.save_workbook()
 
-    def exit_excel(self):
+    def close_excel(self):
         self.excel_app.save_workbook()
         self.excel_app.close_workbook()
 
@@ -118,7 +118,10 @@ class web:
         self.browser.select_from_list_by_label(select_list, "Newest")
         sleep(2)
 
-    def get_news(self, month_range, search_phrase, excel: excel):
+    def get_news(self,
+                 month_range,
+                 search_phrase,
+                 excel: excel):
         if month_range <= 1:
             month_range = 0
         else:
@@ -126,6 +129,7 @@ class web:
         datetime_now = datetime.datetime.now()
         count = 1
         finished = False
+        result = []
         while not finished:
             lines_locator = "//ul[@class='search-results-module-results-menu']//li"
             lines = self.browser.find_elements(lines_locator)
@@ -154,13 +158,14 @@ class web:
                     currency = "True"
                 else:
                     currency = "False"
-                excel.save_to_workbook({"Date": pub_date.strftime("%Y-%m-%d"),
-                                        "Title": pub_title,
-                                        "Description": pub_description,
-                                        "Image file name": pub_img_path,
-                                        "Phrase count": count_phrase,
-                                        "Currency on title or description": currency})
-
+                values_dict = {"Date": pub_date.strftime("%Y-%m-%d"),
+                               "Title": pub_title,
+                               "Description": pub_description,
+                               "Image file name": pub_img_path,
+                               "Phrase count": count_phrase,
+                               "Currency on title or description": currency}
+                excel.save_to_workbook(values_dict)
+                result.append(values_dict)
                 count += 1
             if not finished:
                 show_more_button = "//div[@class='search-results-module-next-page']"
@@ -169,6 +174,7 @@ class web:
                     self.browser.click_element(f"{show_more_button}//a")
                 except:
                     finished = True
+        return result
 
 
 @task
@@ -176,7 +182,7 @@ def capture_news():
     logger = logging.getLogger(__name__)
     logging.basicConfig(filename="applog.log", level=logging.INFO)
     logger.info("Staring WorkItems")
-    work_items = WorkItems()
+    work_items_obj = WorkItems()
     logger.info("Staring Web")
     web_obj = web()
     logger.info("Staring Excel")
@@ -191,28 +197,37 @@ def capture_news():
     while True:
         try:
             logger.info("Getting input work intem")
-            work_items.get_input_work_item()
+            work_items_obj.get_input_work_item()
         except:
             logger.info("No input work item found")
             break
         try:
+            datetime_now = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+            file_name = f"output/Result {datetime_now}.xlsx"
+            excel_obj.set_new_workbook(file_name)
             logger.info("Input work item found")
             web_obj.navigate()
-            search_phrase = work_items.get_work_item_variable("search_phrase")
+            search_phrase = work_items_obj.get_work_item_variable("search_phrase")
             logger.info("Input work item search phrase: %s", search_phrase)
             if not web_obj.search(search_phrase):
                 logger.info(f"No news found for '{search_phrase}'")
-            news_category = work_items.get_work_item_variable("news_category")
+            news_category = work_items_obj.get_work_item_variable("news_category")
             logger.info("Input work item news category: %s", "news_category")
             web_obj.select_category(news_category)
             sleep(1.5)
             web_obj.select_newest()
             sleep(1.5)
-            number_months = work_items.get_work_item_variable("number_months")
+            number_months = work_items_obj.get_work_item_variable("number_months")
             logger.info("Input work item news age in months: %s", str(number_months))
-            web_obj.get_news(number_months, search_phrase, excel_obj)
+            results = web_obj.get_news(number_months,
+                                       search_phrase,
+                                       excel_obj)
+            for result in results:
+                work_items_obj.create_output_work_item(result,
+                                                       files=[file_name])
         except Exception as error_message:
             logger.warning(error_message)
+        finally:
+            excel_obj.close_excel()
             continue
     web_obj.exit_browser()
-    excel_obj.exit_excel()
