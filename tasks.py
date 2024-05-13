@@ -3,7 +3,6 @@ from RPA.Robocorp.WorkItems import WorkItems
 from RPA.Browser.Selenium import Selenium
 from RPA.Excel.Files import Files
 from time import sleep
-from os.path import abspath
 import urllib
 import datetime
 import re
@@ -14,8 +13,9 @@ class excel:
     def __init__(self):
         self.excel_app = Files()
         datetime_now = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-        file_name = abspath(f"data/Result {datetime_now}.xlsx")
+        file_name = f"output/Result {datetime_now}.xlsx"
         self.excel_app.create_workbook(file_name)
+        self.excel_app.save_workbook()
 
     def set_header(self, header):
         self.header = {}
@@ -29,10 +29,11 @@ class excel:
             self.excel_app.set_cell_value(row=row,
                                           column=self.header[column_name],
                                           value=data[column_name])
-        self.excel_app.save_excel()
+        self.excel_app.save_workbook()
 
     def exit_excel(self):
-        self.excel_app.close_document(save_changes=True)
+        self.excel_app.save_workbook()
+        self.excel_app.close_workbook()
 
 
 class web:
