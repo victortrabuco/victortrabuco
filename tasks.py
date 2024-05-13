@@ -154,12 +154,12 @@ class web:
                     currency = "True"
                 else:
                     currency = "False"
-                excel.save_to_workbook({   "Date": pub_date.strftime("%Y-%m-%d"),
-                                                "Title": pub_title,
-                                                "Description": pub_description,
-                                                "Image file name": pub_img_path,
-                                                "Phrase count": count_phrase,
-                                                "Currency on title or description": currency})
+                excel.save_to_workbook({"Date": pub_date.strftime("%Y-%m-%d"),
+                                        "Title": pub_title,
+                                        "Description": pub_description,
+                                        "Image file name": pub_img_path,
+                                        "Phrase count": count_phrase,
+                                        "Currency on title or description": currency})
 
                 count += 1
             if not finished:
