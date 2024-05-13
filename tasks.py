@@ -188,12 +188,6 @@ def capture_news():
     logger.info("Staring Excel")
     excel_obj = excel()
     logger.info("Setting Excel header")
-    excel_obj.set_header(["Date",
-                          "Title",
-                          "Description",
-                          "Image file name",
-                          "Phrase count",
-                          "Currency on title or description"])
     while True:
         try:
             logger.info("Getting input work intem")
@@ -202,10 +196,16 @@ def capture_news():
             logger.info("No input work item found")
             break
         try:
+            logger.info("Input work item found")
             datetime_now = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
             file_name = f"output/Result {datetime_now}.xlsx"
             excel_obj.set_new_workbook(file_name)
-            logger.info("Input work item found")
+            excel_obj.set_header(["Date",
+                                  "Title",
+                                  "Description",
+                                  "Image file name",
+                                  "Phrase count",
+                                  "Currency on title or description"])
             web_obj.navigate()
             search_phrase = work_items_obj.get_work_item_variable("search_phrase")
             logger.info("Input work item search phrase: %s", search_phrase)
@@ -224,7 +224,8 @@ def capture_news():
                                        excel_obj)
             for result in results:
                 work_items_obj.create_output_work_item(result,
-                                                       files=[file_name])
+                                                       files=[file_name],
+                                                       save=True)
         except Exception as error_message:
             logger.warning(error_message)
         finally:
