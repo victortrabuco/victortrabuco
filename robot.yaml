@@ -2,11 +2,8 @@
 # https://github.com/robocorp/rcc/blob/master/docs/recipes.md#what-is-in-robotyaml
 
 tasks:
-  # Task names here are used when executing the bots, so renaming these is recommended.
-  Run all tasks:
-    shell: python -m robot --report NONE --outputdir output --logtitle "Task log" tasks.robot
-
-condaConfigFile: conda.yaml
+  Run Task:
+    shell: python -m robocorp.tasks run tasks.py
 
 environmentConfigs:
   - environment_windows_amd64_freeze.yaml
@@ -14,12 +11,11 @@ environmentConfigs:
   - environment_darwin_amd64_freeze.yaml
   - conda.yaml
 
-artifactsDir: output  
+artifactsDir: output
 
 PATH:
   - .
 PYTHONPATH:
   - .
-
 ignoreFiles:
   - .gitignore
