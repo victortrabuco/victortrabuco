@@ -224,7 +224,7 @@ def capture_news():
                                        excel_obj)
             for result in results:
                 work_items_obj.create_output_work_item(result,
-                                                       files=[file_name],
+                                                       files=[file_name, result["Image file name"]],
                                                        save=True)
         except Exception as error_message:
             logger.warning(error_message)
