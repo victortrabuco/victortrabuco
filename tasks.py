@@ -1,35 +1,32 @@
 from robocorp.tasks import task
 from RPA.Robocorp.WorkItems import WorkItems
 from RPA.Browser.Selenium import Selenium
-from RPA.Excel.Application import Application
+from RPA.Excel.Files import Files
 from time import sleep
 from os.path import abspath
 import urllib
 import datetime
 import re
+import logging
 
 
 class excel:
     def __init__(self):
-        self.excel_app = Application()
-        self.excel_app.open_application(visible=True)
+        self.excel_app = Files()
         datetime_now = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-        self.file_name = abspath(f"data/Result {datetime_now}.xlsx")
-        self.header = {}
+        file_name = abspath(f"data/Result {datetime_now}.xlsx")
+        self.excel_app.create_workbook(file_name)
 
-    def set_new_workbook(self, header):
-        self.excel_app.add_new_workbook()
-        self.excel_app.save_excel_as(self.file_name)
-        self.excel_app.close_document()
-        self.excel_app.open_workbook(self.file_name)
+    def set_header(self, header):
+        self.header = {}
         for count, name in enumerate(header):
             self.header[name] = count + 1
-            self.excel_app.write_to_cells(row=1, column=count + 1, value=name)
+            self.excel_app.set_cell_value(row=1, column=count + 1, value=name)
 
     def save_to_workbook(self, data):
-        row, _ = self.excel_app.find_first_available_row()
+        row = self.excel_app.find_empty_row()
         for column_name in data:
-            self.excel_app.write_to_cells(row=row,
+            self.excel_app.set_cell_value(row=row,
                                           column=self.header[column_name],
                                           value=data[column_name])
         self.excel_app.save_excel()
@@ -175,33 +172,46 @@ class web:
 
 @task
 def capture_news():
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename="applog.log", level=logging.INFO)
+    logger.info("Staring WorkItems")
     work_items = WorkItems()
+    logger.info("Staring Web")
     web_obj = web()
+    logger.info("Staring Excel")
     excel_obj = excel()
-    excel.set_new_workbook(["Date",
-                            "Title",
-                            "Description",
-                            "Image file name",
-                            "Phrase count",
-                            "Currency on title or description"])
+    logger.info("Setting Excel header")
+    excel_obj.set_header(["Date",
+                          "Title",
+                          "Description",
+                          "Image file name",
+                          "Phrase count",
+                          "Currency on title or description"])
     while True:
         try:
+            logger.info("Getting input work intem")
             work_items.get_input_work_item()
         except:
+            logger.info("No input work item found")
             break
         try:
+            logger.info("Input work item found")
             web_obj.navigate()
             search_phrase = work_items.get_work_item_variable("search_phrase")
+            logger.info("Input work item search phrase: %s", search_phrase)
             if not web_obj.search(search_phrase):
-                continue
+                logger.info(f"No news found for '{search_phrase}'")
             news_category = work_items.get_work_item_variable("news_category")
+            logger.info("Input work item news category: %s", "news_category")
             web_obj.select_category(news_category)
             sleep(1.5)
             web_obj.select_newest()
             sleep(1.5)
             number_months = work_items.get_work_item_variable("number_months")
+            logger.info("Input work item news age in months: %s", str(number_months))
             web_obj.get_news(number_months, search_phrase, excel_obj)
-        except:
+        except Exception as error_message:
+            logger.warning(error_message)
             continue
     web_obj.exit_browser()
     excel_obj.exit_excel()
