@@ -135,7 +135,7 @@ class web:
                 except:
                     count += 1
                     continue
-                pub_date = datetime.datetime.fromtimestamp(int(pub_time) / 1000, datetime.UTC)
+                pub_date = datetime.datetime.fromtimestamp(int(pub_time) / 1000, datetime.timezone.utc)
                 months_diff = (datetime_now.year - pub_date.year) * 12 + datetime_now.month - pub_date.month
                 if months_diff > month_range:
                     finished = True
