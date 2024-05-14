@@ -57,6 +57,7 @@ class web:
         self.browser.wait_until_element_is_visible(element_locator)
         self.browser.press_keys(element_locator, search_phrase)
         element_locator = "//button[@data-element='search-submit-button']"
+        self.browser.wait_until_element_is_visible(element_locator)
         self.browser.click_element(element_locator)
         try:
             element_locator = "//ul[@class='search-results-module-results-menu']"
@@ -81,6 +82,7 @@ class web:
                 see_all_button = self.browser.find_elements("//div[@class='search-filter'][1]//button")
                 self.browser.click_element(see_all_button[0])
             first_filter = "//div[@class='search-filter'][1]//li"
+            self.browser.wait_until_element_is_visible(first_filter)
             topics_lines = self.browser.find_elements(first_filter)
             for index, topic_line in enumerate(topics_lines, 1):
                 if name.lower() in self.browser.get_text(topic_line).lower():
@@ -101,6 +103,7 @@ class web:
                 see_all_button = self.browser.find_elements(element_locator)
                 self.browser.click_element(see_all_button[0])
             second_filter = "//div[@class='search-filter'][2]//li"
+            self.browser.wait_until_element_is_visible(second_filter)
             topics_lines = self.browser.find_elements(second_filter)
             for index, topic_line in enumerate(topics_lines, 1):
                 if name.lower() in self.browser.get_text(topic_line).lower():
@@ -114,6 +117,7 @@ class web:
 
     def select_newest(self):
         element_locator = "//div[@class='search-results-module-sorts']//select"
+        self.browser.wait_until_element_is_visible(element_locator)
         select_list = self.browser.find_elements(element_locator)[0]
         self.browser.select_from_list_by_label(select_list, "Newest")
         sleep(2)
@@ -132,6 +136,7 @@ class web:
         result = []
         while not finished:
             lines_locator = "//ul[@class='search-results-module-results-menu']//li"
+            self.browser.wait_until_element_is_visible(lines_locator)
             lines = self.browser.find_elements(lines_locator)
             for _ in range(count, len(lines)):
                 try:
@@ -171,6 +176,7 @@ class web:
                 show_more_button = "//div[@class='search-results-module-next-page']"
                 try:
                     self.browser.scroll_element_into_view(show_more_button)
+                    self.browser.wait_until_element_is_visible(show_more_button)
                     self.browser.click_element(f"{show_more_button}//a")
                 except:
                     finished = True
